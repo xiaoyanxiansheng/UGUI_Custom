@@ -22,3 +22,5 @@ buildvm
 minilua
 libluajit.so
 lj_vm.S
+Logs/
+UserSettings/
