@@ -1,6 +1,7 @@
 
 using System;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace NEW_UI
 {
@@ -106,7 +107,47 @@ namespace NEW_UI
                 return baseMaterial;
             }
 
-            // var rootSortCanvas = MaskUtilities.
+            var rootSortCanvas = MaskUtilities.FindRootSortOverriedCanvas(transform);
+            var stencilDepth = MaskUtilities.GetStencilDepth(transform,rootSortCanvas);
+            if (stencilDepth > 8) 
+            {
+                Debug.LogWarning("Mask 层级不能超过8层，在同一个canvas下");
+                return baseMaterial;
+            }
+
+            int desiredStencilBit = 1 << stencilDepth;
+            // 第一个Mask
+            if (desiredStencilBit == 0) 
+            {
+                // 重新创建一个裁剪材质
+                var maskMaterial = StencilMaterial.Add(baseMaterial, 1, StencilOp.Replace, CompareFunction.Always, m_ShowMaskGraphic ? ColorWriteMask.All : 0);
+                StencilMaterial.Remove(m_MaskMaterial);
+                m_MaskMaterial = maskMaterial;
+                // 重新创建一个清理模板值得材质
+                var unmaskMaterial = StencilMaterial.Add(baseMaterial, 1, StencilOp.Zero, CompareFunction.Always, 0);
+                StencilMaterial.Remove(m_UnmaskMaterial);
+                m_UnmaskMaterial = unmaskMaterial;
+                // TODO WG 不清楚具体现实逻辑
+                graphic.canvasRenderer.popMaterialCount = 1;
+                graphic.canvasRenderer.SetPopMaterial(m_UnmaskMaterial, 0);
+
+                return m_MaskMaterial;
+            }
+
+            // 不是第一个Mask
+            var maskMaterial2 = StencilMaterial.Add(baseMaterial, desiredStencilBit | (desiredStencilBit - 1), StencilOp.Replace, CompareFunction.Equal, m_ShowMaskGraphic ? ColorWriteMask.All : 0, desiredStencilBit - 1, desiredStencilBit | (desiredStencilBit - 1));
+            StencilMaterial.Remove(m_MaskMaterial);
+            m_MaskMaterial = maskMaterial2;
+
+            // TODO WG 不清楚具体现实逻辑
+            graphic.canvasRenderer.hasPopInstruction = true;
+            var unmaskMaterial2 = StencilMaterial.Add(baseMaterial, desiredStencilBit - 1, StencilOp.Replace, CompareFunction.Equal, 0, desiredStencilBit - 1, desiredStencilBit | (desiredStencilBit - 1));
+            StencilMaterial.Remove(m_UnmaskMaterial);
+            m_UnmaskMaterial = unmaskMaterial2;
+            graphic.canvasRenderer.popMaterialCount = 1;
+            graphic.canvasRenderer.SetPopMaterial(m_UnmaskMaterial, 0);
+
+            return m_MaskMaterial;
         }
 
         public bool IsRaycastLocationValid(Vector2 sp, Camera eventCamera)
