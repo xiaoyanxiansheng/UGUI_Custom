@@ -137,8 +137,17 @@ namespace NEW_UI
         {
             get
             {
-                // TODO ¼ò»¯
-                return material;
+                var components = ListPool<Component>.Get();
+                GetComponents((typeof(IMaterialModifier)), components);
+
+                var currentMat = material;
+                for (int i = 0; i < components.Count; i++) 
+                {
+                    currentMat = (components[i] as IMaterialModifier).GetModifiedMaterial(currentMat); 
+                }
+                ListPool<Component>.Release(components);
+
+                return currentMat;
             }
         }
 

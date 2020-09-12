@@ -22,8 +22,8 @@ namespace NEW_UI
                     if (toNotify != null)
                         toNotify.RecalculateMasking();
                 }
-                ListPool<Component>.Release(components);
             }
+            ListPool<Component>.Release(components);
         }
 
         public static Transform FindRootSortOverriedCanvas(Transform start) 
