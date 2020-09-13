@@ -14,7 +14,7 @@ namespace NEW_UI
     {
         static protected Material s_DefaultUI = null;
         static protected Texture2D s_WhiteTexture = null;
-
+        
         static public Material defaultGraphicMaterial
         {
             get
@@ -27,6 +27,8 @@ namespace NEW_UI
             }
         }
 
+        [NonSerialized] private Canvas m_Canvas;
+
         [FormerlySerializedAs("m_Mat")]
         [SerializeField] protected Material m_Material;
         [SerializeField] private Color m_Color = Color.white;
@@ -37,6 +39,40 @@ namespace NEW_UI
         [NonSerialized] private bool m_MaterialDirty;
         [NonSerialized] protected static Mesh s_Mesh;
         [NonSerialized] private static readonly VertexHelper s_VertexHelper = new VertexHelper();
+
+        public Canvas canvas
+        {
+            get
+            {
+                if (m_Canvas == null)
+                    CacheCanvas();
+                return m_Canvas;
+            }
+        }
+
+        private void CacheCanvas()
+        {
+            var list = ListPool<Canvas>.Get();
+            gameObject.GetComponentsInParent(false, list);
+            if (list.Count > 0)
+            {
+                // Find the first active and enabled canvas.
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    if (list[i].isActiveAndEnabled)
+                    {
+                        m_Canvas = list[i];
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                m_Canvas = null;
+            }
+
+            ListPool<Canvas>.Release(list);
+        }
 
         public virtual Texture mainTexture
         {
@@ -246,6 +282,17 @@ namespace NEW_UI
                     s_Mesh.hideFlags = HideFlags.HideAndDontSave;
                 }
                 return s_Mesh;
+            }
+        }
+
+        /// <summary>
+        /// 由不裁剪到裁剪会重建，裁剪到不裁剪则不会
+        /// </summary>
+        public virtual void OnCullingChanged() 
+        {
+            if (!canvasRenderer.cull && (m_VertsDirty || m_MaterialDirty)) 
+            {
+                CanvasUpdateRegistry.RegisterCanvasElementForGraphicRebuild(this);
             }
         }
     }

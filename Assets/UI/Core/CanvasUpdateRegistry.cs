@@ -71,8 +71,13 @@ namespace NEW_UI
         {
             CleanInvalidItems();
 
-            m_PerformingGraphicUpdate = true;
+            // 布局
 
+            // 布局之后裁剪
+            ClipperRegistry.instance.Cull();
+
+            // 裁剪之后重建
+            m_PerformingGraphicUpdate = true;
             for (var i = (int)CanvasUpdate.PreRender; i < (int)(CanvasUpdate.MaxUpdateValue); i++) 
             {
                 for (var k = 0; k < instance.m_GraphicRebuildQueue.Count; k++) 

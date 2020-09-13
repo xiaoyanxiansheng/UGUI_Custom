@@ -8,7 +8,7 @@ namespace NEW_UI
     [ExecuteAlways]
     [RequireComponent(typeof(RectTransform))]
     [DisallowMultipleComponent]
-    public class Mask : UIIBehaviour, ICanvasRaycastFilter, IMaterialModifier
+    public class Mask : UIIBehaviour, IMaterialModifier
     {
         [NonSerialized]
         private Graphic m_Graphic;

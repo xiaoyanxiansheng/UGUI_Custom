@@ -22,7 +22,22 @@ namespace NEW_UI
         protected virtual void OnDestroy()
         { }
 
-        protected virtual void OnRectTransformDimensionsChange() 
+        protected virtual void OnRectTransformDimensionsChange()
+        { }
+
+        protected virtual void OnBeforeTransformParentChanged()
+        { }
+
+        protected virtual void OnTransformParentChanged()
+        { }
+
+        protected virtual void OnDidApplyAnimationProperties()
+        { }
+
+        protected virtual void OnCanvasGroupChanged()
+        { }
+
+        protected virtual void OnCanvasHierarchyChanged()
         { }
 
         public virtual bool IsActive()
